@@ -11,45 +11,6 @@ const jwt = require('jsonwebtoken');
 
 
 
-// const AccountController= require('../controllers/AccountController');
-
-
-// router.post('/register',AccountController.index);
-
-// router.post('/login',AccountController.show);
-
-// router.get('/login',)
-
-// async function check(req, res , next){
-//     const header=req.header('Authorization')
-//     const token=(!!header)?header.split(' ')[1]:header;
-//     if(!token){
-//         return res.json({
-//             message:'A token is required for authentication',
-//             success:false
-//         })
-//     }
-//     try {
-//         const decoded= await jwt.verify(token,'afakdaskjbddaskdbs');
-//         if(!!decoded)
-//         {
-//            req.UserID=decoded.UserID;
-//         //console.log(req.UserID),
-//            next();  
-//         }
-//         else{
-//             return res.json({
-//                 success:false,
-//                 message:'Token not found'
-//             })
-//         }
-//     } catch (error) {
-//         return res.json({
-//             message:'Invalid Token',
-//             success:false
-//         })
-//     }
-// }
 
 
 //XAC THUC DANG KY
@@ -156,83 +117,56 @@ router.post('/login1', async (req, res, next) => {
 
         })
     }
+//FOLLOWER CA NHAN
 
+router.post('/follows/:id',verifyToken,async(req, res, next)=>{
+    if (req.params.id !== req.UserID){
+    try {
+        
+        let accounts=await Accounts.findById(req.UserID)
+        
+        let currentUser= await Accounts.findById(req.params.id);
+    
+
+       if(!currentUser){
+           return res.json({
+               success:false,
+               message:'User does not exist'
+           })
+       }
+       else{
+
+           if(currentUser.follows.filter((follow)=>follow.user === req.UserID).length>0){
+               const indexFollow=accounts.follows.map((values)=>values.user).indexOf(req.UserID)
+               currentUser.follows.splice(indexFollow, 1)
+           }
+           else
+               await currentUser.follows.unshift({user: req.UserID, name:accounts.userName})
+           
+           await currentUser.save();
+           return res.json({
+               success:true,
+               message:'successflly',
+               currentUser
+           })
+    }
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: 'you already followed the user'
+        })
+    }
+}
+else{
+    return res.json({
+        success:false,
+        message:'You can not follow yourself '
+    })
+}
+})
     
 
 
-})
-
-
-// router.get('/auth',async(req, res, next)=>{
-//     // const token= req.query.token || req.header.token["Access Token"];
-//     const header=req.header('Authorization');
-//     const token=(!!header)?header.split(' ')[1]:header;
-//     if(!token){
-//         return res.json({
-//             message:'A token is required for authentication',
-//             success:false
-//         })
-//     }
-//     try {
-//         const decoded= await jwt.verify(token,'afakdaskjbddaskdbs');
-//         if(!!decoded)
-//         {
-//             const user=Accounts.findById({_id:decoded.UserID});
-//             if(!!user){
-//                 return res.json({
-//                     success:true,
-//                     token
-//                 })
-//             }
-//             else{
-//                 return res.json({
-//                     success:false,
-//                     message:'Token not is not definded'
-//                 })
-//             }
-//         }
-//         else{
-//             return res.json({
-//                 success:false,
-//                 message:'Token not found'
-//             })
-//         }
-//     } catch (error) {
-//         return res.json({
-//             message:'Invalid Token',
-//             success:false
-//         })
-//     }
-//     return next();
-// })
-
-// route.get('/all',(req, res, next)=>{
-//     try{
-//         if(!!token)
-//         next()
-//     }
-//     catch(err){
-//             res.json({
-//                 message:'Fail Token',
-//                 success:false,
-//             })      
-//     }
-// })
-
-
-
-// router.get('/user',check, (req, res, next)=>{
-//     next()
-// },(req, res, next)=>{
-//     res.json('User')
-// })
-
-
-// router.get('/admin', check, (req, res, next)=>{
-//     next()
-// },(req, res, next)=>{
-//     res.json('Admin')
-// })
 
 
 
